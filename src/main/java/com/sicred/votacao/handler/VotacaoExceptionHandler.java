@@ -1,9 +1,12 @@
 package com.sicred.votacao.handler;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sicred.votacao.exception.ApiBusinessException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +54,7 @@ public class VotacaoExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ApiBusinessException.class})
     public ResponseEntity<Object> handleApiBusinessException(ApiBusinessException ex, WebRequest request) {
-        String mensagem = messageSource.getMessage("mensagem.business_validation", null, LocaleContextHolder.getLocale());
+        String mensagem = null;
         String mensagemDev = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
         List<Erro> erros = Arrays.asList(new Erro(mensagem, mensagemDev));
         return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.CONFLICT, request);
@@ -86,7 +89,9 @@ public class VotacaoExceptionHandler extends ResponseEntityExceptionHandler {
         return erros;
     }
     
-    public static class Erro {
+    @SuppressWarnings("serial")
+    @JsonInclude(value = Include.NON_NULL)
+    public static class Erro implements Serializable {
 
         private String mensagemUsuario;
         private String mensagemDesenvolvedor;

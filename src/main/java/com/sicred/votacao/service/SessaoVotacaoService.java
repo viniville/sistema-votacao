@@ -1,5 +1,6 @@
 package com.sicred.votacao.service;
 
+import com.sicred.votacao.exception.ApiBusinessException;
 import com.sicred.votacao.exception.PautaInexistenteException;
 import com.sicred.votacao.exception.SessaoVotacaoEncerradaException;
 import com.sicred.votacao.exception.SessaoVotacaoInicioInvalidoException;
@@ -24,8 +25,12 @@ public class SessaoVotacaoService {
     @Autowired
     private PautaService pautaService;
 
-    public SessaoVotacao findByIdPauta(Long id) {
-        return sessaoVotacaoRepository.findByIdPauta(id);
+    public SessaoVotacao findByIdPauta(Long idPauta) {
+        Optional<SessaoVotacao> optSessao = sessaoVotacaoRepository.findByIdPauta(idPauta);
+        if(!optSessao.isPresent()) {
+            throw new ApiBusinessException("Não existe sessão de votação registrada para esta pauta");
+        }
+        return optSessao.get();
     }
 
     public SessaoVotacao findById(Long id) {
@@ -54,15 +59,12 @@ public class SessaoVotacaoService {
      * @return
      */
     public SessaoVotacao abrirSessao(Long idPauta, Date dataHoraAbertura, Integer tempoDuracaoMinutos) {
-        //validamos se já existe uma sessão de votação para esta pauta - não deixa cadastrar mais de uma 
-        SessaoVotacao sessaoVotacaoPauta = this.findByIdPauta(idPauta);
-        if(sessaoVotacaoPauta != null) {
-            if((new Date()).after(sessaoVotacaoPauta.getDataFechamento())) {
-                throw new SessaoVotacaoEncerradaException("Sessão de votação desta pauta já está encerrada");
-            } else {
-                throw new SessaoVotacaoNaoIniciadaException("Sessão de votação ainda não iniciou");
-            }
+        if(dataHoraAbertura == null) {
+            dataHoraAbertura = new Date();
         }
+        //validamos se já existe uma sessão de votação para esta pauta - não deixa cadastrar mais de uma 
+        validaJaExisteSessaoVotacao(idPauta);
+        //validação da data de inicio q não pode ser retroativa
         validaDataInicioRetroativa(dataHoraAbertura);
 
         SessaoVotacao novaSessaoVotacao = new SessaoVotacao();
@@ -70,8 +72,8 @@ public class SessaoVotacaoService {
         if(novaSessaoVotacao.getPauta() == null) {
             throw new PautaInexistenteException("Pauta inexistente");
         }
-        //criei este atributo, pois ele permite q seja possível, se quiser, agendar previamente a abertura de uma sessão 
-        //ou seja, é possível criar um método que insere uma sessão de votação com data de início já pre-definida
+        //criei este atributo, pois ele permite q seja possÃ­vel, se quiser, agendar previamente a abertura de uma sessÃ£o 
+        //ou seja, Ã© possÃ­vel criar um mÃ©todo que insere uma sessÃ£o de votaÃ§Ã£o com data de inÃ­cio jÃ¡ pre-definida
         novaSessaoVotacao.setDataAbertura(dataHoraAbertura); 
         Calendar cal = Calendar.getInstance();
         cal.setTime(dataHoraAbertura);
@@ -80,6 +82,22 @@ public class SessaoVotacaoService {
         novaSessaoVotacao.setDataFechamento(cal.getTime());
         novaSessaoVotacao.setDataCadastro(new Date());
         return sessaoVotacaoRepository.save(novaSessaoVotacao);
+    }
+
+    private void validaJaExisteSessaoVotacao(Long idPauta) {
+        SessaoVotacao sessaoVotacaoPauta = null;
+        try {
+            sessaoVotacaoPauta = this.findByIdPauta(idPauta);
+            if(sessaoVotacaoPauta != null) {
+                if((new Date()).after(sessaoVotacaoPauta.getDataFechamento())) {
+                    throw new SessaoVotacaoEncerradaException("SessÃ£o de votaÃ§Ã£o desta pauta jÃ¡ estÃ¡ encerrada");
+                } else {
+                    throw new SessaoVotacaoNaoIniciadaException("SessÃ£o de votaÃ§Ã£o ainda nÃ£o iniciou");
+                }
+            }
+        } catch (RuntimeException ex) {
+            return;
+        }
     }
 
     private void validaDataInicioRetroativa(Date dataHoraAbertura) {
