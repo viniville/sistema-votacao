@@ -5,12 +5,15 @@ import com.sicred.votacao.exception.PautaInexistenteException;
 import com.sicred.votacao.exception.SessaoVotacaoEncerradaException;
 import com.sicred.votacao.exception.SessaoVotacaoInicioInvalidoException;
 import com.sicred.votacao.exception.SessaoVotacaoNaoIniciadaException;
+import com.sicred.votacao.model.Pauta;
 import com.sicred.votacao.model.SessaoVotacao;
 import com.sicred.votacao.repository.SessaoVotacaoRepository;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -18,6 +21,9 @@ import java.util.Optional;
 
 @Service
 public class SessaoVotacaoService {
+
+    @Autowired
+    private Logger log;
 
     @Autowired
     private SessaoVotacaoRepository sessaoVotacaoRepository;
@@ -33,6 +39,7 @@ public class SessaoVotacaoService {
         return optSessao.get();
     }
 
+    @Transactional
     public SessaoVotacao findById(Long id) {
         Optional<SessaoVotacao> optSessao = sessaoVotacaoRepository.findById(id);
         if(!optSessao.isPresent()) {
@@ -40,8 +47,9 @@ public class SessaoVotacaoService {
         }
         SessaoVotacao sessao = optSessao.get();
         if(sessao.getPauta() != null) {
-            sessao.getPauta().getDescricao();
-            sessao.getPauta().getTitulo();
+            Pauta pauta = sessao.getPauta();
+            pauta.getTitulo();
+            pauta.getDescricao();
         }
         return sessao;
     }
