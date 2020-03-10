@@ -25,6 +25,7 @@ public class SessaoVotacao extends VotacaoAbstractModel<Long> {
     @Column(name = "dh_fechamento", nullable = false)
     private Date dataFechamento;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "sessaoVotacao", fetch = FetchType.LAZY)
     private List<VotoAssociado> votos;
 

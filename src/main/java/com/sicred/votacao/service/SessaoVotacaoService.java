@@ -32,6 +32,7 @@ public class SessaoVotacaoService {
     private PautaService pautaService;
 
     public SessaoVotacao findByIdPauta(Long idPauta) {
+        log.debug("into findByIdPauta method");
         Optional<SessaoVotacao> optSessao = sessaoVotacaoRepository.findByIdPauta(idPauta);
         if(!optSessao.isPresent()) {
             throw new ApiBusinessException("Não existe sessão de votação registrada para esta pauta");
@@ -39,19 +40,12 @@ public class SessaoVotacaoService {
         return optSessao.get();
     }
 
-    @Transactional
     public SessaoVotacao findById(Long id) {
         Optional<SessaoVotacao> optSessao = sessaoVotacaoRepository.findById(id);
         if(!optSessao.isPresent()) {
             throw new EmptyResultDataAccessException(1);
         }
-        SessaoVotacao sessao = optSessao.get();
-        if(sessao.getPauta() != null) {
-            Pauta pauta = sessao.getPauta();
-            pauta.getTitulo();
-            pauta.getDescricao();
-        }
-        return sessao;
+        return optSessao.get();
     }
 
     public SessaoVotacao abrirSessao(Long idPauta, Integer tempoDuracaoMinutos) {
