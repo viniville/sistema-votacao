@@ -32,6 +32,9 @@ public class VotoAssociadoService {
     @Value("${validar.cpf.servico.remoto}")
     private Boolean validarCpfServicoRemoto;
 
+    @Value("${validar.cpf.servico.remoto.url}")
+    private String cpfValidoUrl;
+
     @Autowired
     private VotoAssociadoRepository votoAssociadoRepository;
 
@@ -80,7 +83,6 @@ public class VotoAssociadoService {
         if(Boolean.TRUE.equals(validarCpfServicoRemoto)) {
             try {
                 RestTemplate restTemplate = new RestTemplate();
-                String cpfValidoUrl = "http://user-info.herokuapp.com/users/";
                 ResponseEntity<HabilitadoParaVotarDTO> response
                         = restTemplate.getForEntity(cpfValidoUrl + cpfAssociado, HabilitadoParaVotarDTO.class);
                 if (response != null && response.getStatusCode() != null && response.getStatusCode().equals(HttpStatus.OK)) {
