@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sicred.votacao.exception.ApiBusinessException;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -35,9 +36,13 @@ public class VotacaoExceptionHandler extends ResponseEntityExceptionHandler {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private Logger log;
+
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.debug("into handleHttpMessageNotReadable method");
         String mensagem = messageSource.getMessage("mensagem.invalida", null, LocaleContextHolder.getLocale());
         String mensagemDev = ex.getRootCause() != null ? 
                                 ex.getRootCause().getMessage() : (ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage());
@@ -48,20 +53,23 @@ public class VotacaoExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
+        log.debug("into handleMethodArgumentNotValid method");
         List<Erro> erros = criarListDeErros(ex.getBindingResult());
         return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler({ApiBusinessException.class})
     public ResponseEntity<Object> handleApiBusinessException(ApiBusinessException ex, WebRequest request) {
-        String mensagem = null;
-        String mensagemDev = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+        log.debug("into handleApiBusinessException method");
+        String mensagem = ex.getMessage();
+        String mensagemDev = ex.getCause() != null ? ex.getCause().getMessage() : null;
         List<Erro> erros = Arrays.asList(new Erro(mensagem, mensagemDev));
         return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler({EmptyResultDataAccessException.class})
     public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request) {
+        log.debug("into handleEmptyResultDataAccessException method");
         String mensagem = messageSource.getMessage("mensagem.recurso_nao_encontrado", null, LocaleContextHolder.getLocale());
         String mensagemDev = ex.getRootCause() != null ? 
                                 ex.getRootCause().getMessage() : (ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage());
@@ -71,6 +79,7 @@ public class VotacaoExceptionHandler extends ResponseEntityExceptionHandler {
     
     @ExceptionHandler({DataIntegrityViolationException.class})
     public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
+        log.debug("into handleDataIntegrityViolationException method");
         String mensagem = messageSource.getMessage("mensagem.recurso_vinculado_inexistente", null, LocaleContextHolder.getLocale());
         String mensagemDev = ex.getRootCause() != null ? 
                                 ex.getRootCause().getMessage() : (ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage());
@@ -119,4 +128,5 @@ public class VotacaoExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
     }
+
 }

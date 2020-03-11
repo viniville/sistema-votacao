@@ -20,7 +20,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -37,9 +36,6 @@ public class VotoAssociadoService {
 
     @Autowired
     private VotoAssociadoRepository votoAssociadoRepository;
-
-    @Autowired
-    private SessaoVotacaoService sessaoVotacaoService;
 
     public VotoAssociado votar(VotoAssociado votoAssociado) {
         if(votoAssociado == null ||
@@ -101,8 +97,6 @@ public class VotoAssociadoService {
 
     private void sessaoAbertaParaVotacao(SessaoVotacao sessaoVotacao) {
         log.debug("into sessaoAbertaParaVotacao method");
-        sessaoVotacao = sessaoVotacaoService.findById(sessaoVotacao.getId());
-        log.debug(sessaoVotacao.getStatus().toString());
         if(sessaoVotacao.getStatus().equals(StatusSessaoVotacao.ENCERRADA)) {
             throw new ApiBusinessException("Sessão de votação desta pauta já está encerrada");
         }
@@ -111,7 +105,4 @@ public class VotoAssociadoService {
         }
     }
 
-    public List<VotoAssociado> listarVotosSessao(SessaoVotacao sessaoVotacao) {
-        return votoAssociadoRepository.findAllBySessaoVotacaoEquals(sessaoVotacao);
-    }
 }

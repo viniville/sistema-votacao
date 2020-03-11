@@ -17,12 +17,12 @@ public class VotoAssociado extends VotacaoAbstractModel<Long> {
     @JoinColumn(name = "id_sessao_votacao", nullable = false, updatable = false)
     private SessaoVotacao sessaoVotacao;
 
-    @NotNull(message = "CPF do associado é obrigatório")
+    @NotNull
     @Pattern(regexp = "^[0-9]{11}$", message = "CPF inválido")
     @Column(name = "cpf_associado", length = 11)
     private String cpfAssociado;
 
-    @NotNull(message = "Voto(Sim/Não) é obrigatório")
+    @NotNull
     @Column(name = "voto", nullable = false)
     @Enumerated(EnumType.STRING)
     private OpcaoVoto voto;

@@ -9,11 +9,11 @@ public class VotoAssociadoDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotNull(message = "ID da pauta é obrigatório")
+    @NotNull
     private Long idPauta;
-    @NotNull(message = "CPF do associado é obrigatório")
+    @NotNull
     private String cpfAssociado;
-    @NotNull(message = "Opção de voto(SIM/NÃO) é obrigatório")
+    @NotNull
     private OpcaoVoto voto;
 
     public Long getIdPauta() {

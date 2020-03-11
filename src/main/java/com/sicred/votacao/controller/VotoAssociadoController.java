@@ -4,8 +4,7 @@ import com.sicred.votacao.dto.VotoAssociadoDTO;
 import com.sicred.votacao.model.VotoAssociado;
 import com.sicred.votacao.service.SessaoVotacaoService;
 import com.sicred.votacao.service.VotoAssociadoService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,8 @@ import java.net.URI;
 @RequestMapping(value = "/v1/votoAssociado", produces = {MediaType.APPLICATION_JSON_VALUE})
 public class VotoAssociadoController {
 
-    private Log log = LogFactory.getLog(VotoAssociadoController.class);
+    @Autowired
+    private Logger log;
 
     @Autowired
     private VotoAssociadoService votoAssociadoService;
@@ -32,7 +32,7 @@ public class VotoAssociadoController {
 
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Void> votar(@Valid @RequestBody VotoAssociadoDTO votoAssociadoDTO) {
-        log.info("REST método votar()");
+        log.debug("into votar method");
         VotoAssociado votoAssociado = new VotoAssociado();
         votoAssociado.setCpfAssociado(votoAssociadoDTO.getCpfAssociado());
         votoAssociado.setSessaoVotacao(sessaoVotacaoService.findByIdPauta(votoAssociadoDTO.getIdPauta()));

@@ -2,10 +2,8 @@ package com.sicred.votacao.service;
 
 import com.sicred.votacao.exception.ApiBusinessException;
 import com.sicred.votacao.exception.PautaInexistenteException;
-import com.sicred.votacao.exception.SessaoVotacaoEncerradaException;
 import com.sicred.votacao.exception.SessaoVotacaoInicioInvalidoException;
-import com.sicred.votacao.exception.SessaoVotacaoNaoIniciadaException;
-import com.sicred.votacao.model.Pauta;
+import com.sicred.votacao.exception.SessaoVotacaoJaExisteException;
 import com.sicred.votacao.model.SessaoVotacao;
 import com.sicred.votacao.repository.SessaoVotacaoRepository;
 
@@ -13,7 +11,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -90,16 +87,12 @@ public class SessaoVotacaoService {
         SessaoVotacao sessaoVotacaoPauta = null;
         try {
             sessaoVotacaoPauta = this.findByIdPauta(idPauta);
-            if(sessaoVotacaoPauta != null) {
-                if((new Date()).after(sessaoVotacaoPauta.getDataFechamento())) {
-                    throw new SessaoVotacaoEncerradaException("SessÃ£o de votaÃ§Ã£o desta pauta jÃ¡ estÃ¡ encerrada");
-                } else {
-                    throw new SessaoVotacaoNaoIniciadaException("SessÃ£o de votaÃ§Ã£o ainda nÃ£o iniciou");
-                }
-            }
         } catch (RuntimeException ex) {
             return;
         }
+        if(sessaoVotacaoPauta != null) {
+            throw new SessaoVotacaoJaExisteException("Já existe sessão de votação para esta pauta");
+        }        
     }
 
     private void validaDataInicioRetroativa(Date dataHoraAbertura) {
