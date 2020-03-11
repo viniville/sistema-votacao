@@ -1,16 +1,21 @@
 package com.sicred.votacao.service;
 
+import com.sicred.votacao.dto.ResultadoVotacaoDTO;
+import com.sicred.votacao.enums.OpcaoVoto;
 import com.sicred.votacao.exception.ApiBusinessException;
 import com.sicred.votacao.exception.PautaInexistenteException;
 import com.sicred.votacao.exception.SessaoVotacaoInicioInvalidoException;
 import com.sicred.votacao.exception.SessaoVotacaoJaExisteException;
 import com.sicred.votacao.model.SessaoVotacao;
+import com.sicred.votacao.model.VotoAssociado;
 import com.sicred.votacao.repository.SessaoVotacaoRepository;
+import com.sicred.votacao.task.SessaoEncerradaScheduleTask;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -27,6 +32,9 @@ public class SessaoVotacaoService {
 
     @Autowired
     private PautaService pautaService;
+
+    @Autowired
+    private SessaoEncerradaScheduleTask agendadorTarefa;
 
     public SessaoVotacao findByIdPauta(Long idPauta) {
         log.debug("into findByIdPauta method");
@@ -80,7 +88,9 @@ public class SessaoVotacaoService {
         cal.add(Calendar.MINUTE, tempoDuracaoMinutos.intValue());
         novaSessaoVotacao.setDataFechamento(cal.getTime());
         novaSessaoVotacao.setDataCadastro(new Date());
-        return sessaoVotacaoRepository.save(novaSessaoVotacao);
+        novaSessaoVotacao = sessaoVotacaoRepository.save(novaSessaoVotacao);
+        agendadorTarefa.agendarPostEventSessaoEncerrada(novaSessaoVotacao);
+        return novaSessaoVotacao;
     }
 
     private void validaJaExisteSessaoVotacao(Long idPauta) {
@@ -107,4 +117,26 @@ public class SessaoVotacaoService {
     public void deleteById(Long id) {
         sessaoVotacaoRepository.deleteById(id);
     }
+
+    @Transactional
+    public ResultadoVotacaoDTO resultadoVotacao(Long idPauta) {
+        log.debug("into resultadoVotacao method");
+        ResultadoVotacaoDTO resultadoVotacaoDTO = new ResultadoVotacaoDTO();
+        SessaoVotacao sessaoVotacao = this.findByIdPauta(idPauta);
+        resultadoVotacaoDTO.setStatus(sessaoVotacao.getStatus().toString());
+        resultadoVotacaoDTO.setTotalVotos(new Long(sessaoVotacao.getVotos().size()));
+        resultadoVotacaoDTO.setTotalVotosNAO(0l);
+        resultadoVotacaoDTO.setTotalVotosSIM(0L);
+        if(sessaoVotacao != null) {
+            for(VotoAssociado voto : sessaoVotacao.getVotos()) {
+                if(OpcaoVoto.SIM.equals(voto.getVoto())) {
+                    resultadoVotacaoDTO.setTotalVotosSIM(resultadoVotacaoDTO.getTotalVotosSIM().longValue() + 1L);
+                } else {
+                    resultadoVotacaoDTO.setTotalVotosNAO(resultadoVotacaoDTO.getTotalVotosNAO().longValue() + 1L);
+                }
+            }
+        }
+        return resultadoVotacaoDTO;
+    }
+
 }
