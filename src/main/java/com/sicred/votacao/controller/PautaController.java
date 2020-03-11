@@ -1,10 +1,7 @@
 package com.sicred.votacao.controller;
 
 import com.sicred.votacao.dto.ResultadoVotacaoDTO;
-import com.sicred.votacao.enums.OpcaoVoto;
 import com.sicred.votacao.model.Pauta;
-import com.sicred.votacao.model.SessaoVotacao;
-import com.sicred.votacao.model.VotoAssociado;
 import com.sicred.votacao.service.PautaService;
 import com.sicred.votacao.service.SessaoVotacaoService;
 
@@ -69,24 +66,7 @@ public class PautaController {
     @GetMapping(value = "/{id}/resultado")
     @ResponseStatus(code = HttpStatus.OK)
     public ResultadoVotacaoDTO resultadoVotacao(@PathVariable("id") Long id) {
-        log.debug("into resultadoVotacao method");
-        ResultadoVotacaoDTO resultadoVotacaoDTO = new ResultadoVotacaoDTO();
-        SessaoVotacao sessaoVotacao = sessaoVotacaoService.findByIdPauta(id);
-        resultadoVotacaoDTO.setStatus(sessaoVotacao.getStatus().toString());
-        resultadoVotacaoDTO.setTotalVotos(new Long(sessaoVotacao.getVotos().size()));
-        resultadoVotacaoDTO.setTotalVotosNAO(0l);
-        resultadoVotacaoDTO.setTotalVotosSIM(0L);
-        if(sessaoVotacao != null) {
-            for(VotoAssociado voto : sessaoVotacao.getVotos()) {
-                if(OpcaoVoto.SIM.equals(voto.getVoto())) {
-                    resultadoVotacaoDTO.setTotalVotosSIM(resultadoVotacaoDTO.getTotalVotosSIM().longValue() + 1L);
-                } else {
-                    resultadoVotacaoDTO.setTotalVotosNAO(resultadoVotacaoDTO.getTotalVotosNAO().longValue() + 1L);
-                }
-            }
-        }
-        return resultadoVotacaoDTO;
+        return sessaoVotacaoService.resultadoVotacao(id);
     }
-
 
 }

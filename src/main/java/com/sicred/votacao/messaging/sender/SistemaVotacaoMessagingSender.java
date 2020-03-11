@@ -1,4 +1,4 @@
-package com.sicred.votacao.listener;
+package com.sicred.votacao.messaging.sender;
 
 import javax.jms.Queue;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * MySender
  */
 @Component
-public class MySender {
+public class SistemaVotacaoMessagingSender {
 
     @Autowired
     private JmsMessagingTemplate jmsMessagingTemplate;
