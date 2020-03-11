@@ -1,7 +1,5 @@
 package com.sicred.votacao.task;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sicred.votacao.dto.ResultadoVotacaoDTO;
@@ -29,18 +27,22 @@ public class SessaoEncerradaEventTask implements Runnable {
 
     private Long idPauta;
 
-    public SessaoEncerradaEventTask(@NotNull Long idPauta) {
+
+    public void setIdPauta(Long idPauta) {
         this.idPauta = idPauta;
     }
 
     @Override
     public void run() {
-        ResultadoVotacaoDTO resultado = sessaoVotacaoService.resultadoVotacao(idPauta);
-        try {
-            String msg = (new ObjectMapper()).writeValueAsString(resultado);
-            senderMsg.send(msg);
-        } catch (JsonProcessingException e) {
-            log.error("Erro na serialização do resultado da votação.\n" + e.getMessage(), e.getCause());
+        log.debug("into run method");
+        if(idPauta != null) {
+            ResultadoVotacaoDTO resultado = sessaoVotacaoService.resultadoVotacao(idPauta);
+            try {
+                String msg = (new ObjectMapper()).writeValueAsString(resultado);
+                senderMsg.send(msg);
+            } catch (JsonProcessingException e) {
+                log.error("Erro na serialização do resultado da votação.\n" + e.getMessage(), e.getCause());
+            }
         }
     }
 

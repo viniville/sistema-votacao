@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -117,6 +118,7 @@ public class SessaoVotacaoService {
         sessaoVotacaoRepository.deleteById(id);
     }
 
+    @Transactional
     public ResultadoVotacaoDTO resultadoVotacao(Long idPauta) {
         log.debug("into resultadoVotacao method");
         ResultadoVotacaoDTO resultadoVotacaoDTO = new ResultadoVotacaoDTO();

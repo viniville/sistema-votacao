@@ -18,11 +18,13 @@ public class SessaoEncerradaScheduleTask {
 	@Autowired
     private ThreadPoolTaskScheduler taskScheduler;
 
+    @Autowired
+    private SessaoEncerradaEventTask task;
+
     public void agendarPostEventSessaoEncerrada(SessaoVotacao sessaoVotacao) {
         //Agenda a tarefa para 10 segundos depois da data de encerramento da sessão
-        taskScheduler.schedule(
-			new SessaoEncerradaEventTask(sessaoVotacao.getPauta().getId()),
-			new Date(sessaoVotacao.getDataFechamento().getTime() + 10000));
+        task.setIdPauta(sessaoVotacao.getPauta().getId());
+        taskScheduler.schedule(task, new Date(sessaoVotacao.getDataFechamento().getTime() + 10000));
         
     }
 }

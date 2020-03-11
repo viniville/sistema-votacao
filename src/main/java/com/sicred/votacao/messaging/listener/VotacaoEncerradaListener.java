@@ -19,7 +19,7 @@ public class VotacaoEncerradaListener {
     @JmsListener(destination = MessagingConfig.QUEUE_SESSAO_ENCERRADA_NAME)
     public void receive(String msg) {
         log.debug("recebeu mensagem de sessao encerrada");
-        log.info("Sessão encerrada:\n" + msg);
+        log.info("recebido mensagem de sessão encerrada:\n" + msg);
     }
 
 }
